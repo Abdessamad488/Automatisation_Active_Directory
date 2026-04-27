@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline PentestAI-AD - 7 Phases</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: #0d1117; 
+            color: #c9d1d9;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .header h1 { color: #58a6ff; font-size: 28px; margin-bottom: 10px; }
+        .header .subtitle { color: #8b949e; font-size: 14px; }
+        .header .config {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .config-item { 
+            background: #161b22; 
+            padding: 10px 20px; 
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .config-item span { color: #58a6ff; font-weight: bold; }
+        
+        /* Phase boxes */
+        .phase {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .phase-header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .phase-header:hover { background: #1f2937; }
+        
+        .phase-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .phase-title { flex: 1; }
+        .phase-title h2 { font-size: 18px; margin-bottom: 5px; }
+        .phase-title p { color: #8b949e; font-size: 13px; }
+        
+        .phase-duration {
+            background: #21262d;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #8b949e;
+        }
+        
+        /* Phase colors */
+        .p1 .phase-number { background: #1f6feb; color: white; }
+        .p2 .phase-number { background: #a371f7; color: white; }
+        .p3 .phase-number { background: #3fb950; color: white; }
+        .p4 .phase-number { background: #f85149; color: white; }
+        .p5 .phase-number { background: #d29922; color: white; }
+        .p6 .phase-number { background: #8957e5; color: white; }
+        .p7 .phase-number { background: #58a6ff; color: white; }
+        
+        /* Phase content */
+        .phase-content {
+            padding: 0 20px 20px 90px;
+            display: none;
+        }
+        .phase.expanded .phase-content { display: block; }
+        
+        .tools-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .tool-tag {
+            background: #21262d;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid #30363d;
+        }
+        .tool-tag.active { 
+            background: #238636; 
+            border-color: #238636; 
+        }
+        
+        .attacks-list {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .attacks-list h4 { 
+            color: #f85149; 
+            margin-bottom: 10px; 
+            font-size: 14px;
+        }
+        .attack-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #21262d;
+        }
+        .attack-item:last-child { border-bottom: none; }
+        .attack-icon { margin-right: 12px; }
+        
+        .sub-phases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .sub-phase {
+            background: #0d1117;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            border-left: 3px solid #d29922;
+        }
+        
+        /* Flow diagram */
+        .flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 30px;
+            background: #0d1117;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .flow-step {
+            background: #21262d;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .flow-arrow { color: #8b949e; font-size: 20px; }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+        
+        /* Toggle all */
+        .toggle-all {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .toggle-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .toggle-btn:hover { background: #30363d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🔒 PentestAI-AD Pipeline</h1>
+            <p class="subtitle">Automatisation d'un Pentest Active Directory avec Intelligence Artificielle</p>
+            <div class="config">
+                <div class="config-item">Domain: <span>pentestlab.local</span></div>
+                <div class="config-item">DC: <span>192.168.142.128</span></div>
+                <div class="config-item">Attacker: <span>192.168.142.131</span></div>
+                <div class="config-item">Target: <span>192.168.142.134</span></div>
+            </div>
+        </div>
+        
+        <!-- Flow Diagram -->
+        <div class="flow">
+            <div class="flow-step" style="background: #1f6feb;">1. Recon</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background: #a371f7;">2. Énum</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background: #3fb950;">3. Analyse</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background: #f85149;">4. Détection</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background: #d29922;">5. Exploit</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background: #8957e5;">6. IA</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step" style="background: #58a6ff;">7. Rapport</div>
+        </div>
+        
+        <div class="toggle-all">
+            <button class="toggle-btn" onclick="toggleAll()">Tout déplier / Plier</button>
+        </div>
+        
+        <!-- Phase 1: Reconnaissance -->
+        <div class="phase p1">
+            <div class="phase-header" onclick="toggle('p1')">
+                <div class="phase-number">1</div>
+                <div class="phase-title">
+                    <h2>Reconnaissance</h2>
+                    <p>Découverte passive du réseau et identification des cibles</p>
+                </div>
+                <div class="phase-duration">~5 min</div>
+            </div>
+            <div class="phase-content">
+                <div class="tools-list">
+                    <span class="tool-tag">Nmap 7.95</span>
+                    <span class="tool-tag">Responder --analyze</span>
+                    <span class="tool-tag">netexec</span>
+                    <span class="tool-tag">nbtscan</span>
+                </div>
+                <p style="color: #8b949e; font-size: 13px; margin: 15px 0;">
+                    Découverte des hôtes, ports AD (88, 389, 445, 636), détection du DC et des cibles.
+                    Analyse passive LLMNR/NBT-NS sans envoi de paquets offensifs.
+                </p>
+                <div class="attacks-list">
+                    <h4>🔍 Découverte</h4>
+                    <div class="attack-item"><span class="attack-icon">📡</span> Network scanning (Nmap)</div>
+                    <div class="attack-item"><span class="attack-icon">🎯</span> Host identification (netexec)</div>
+                    <div class="attack-item"><span class="attack-icon">👂</span> Passive sniffing (Responder)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 2: Énumération -->
+        <div class="phase p2">
+            <div class="phase-header" onclick="toggle('p2')">
+                <div class="phase-number">2</div>
+                <div class="phase-title">
+                    <h2>Énumération</h2>
+                    <p>Collecte active des objets Active Directory</p>
+                </div>
+                <div class="phase-duration">~10 min</div>
+            </div>
+            <div class="phase-content">
+                <div class="tools-list">
+                    <span class="tool-tag">Kerbrute</span>
+                    <span class="tool-tag">ldap3</span>
+                    <span class="tool-tag">PowerView</span>
+                    <span class="tool-tag">SharpHound</span>
+                </div>
+                <p style="color: #8b949e; font-size: 13px; margin: 15px 0;">
+                    Énumération des utilisateurs, ordinateurs, groupes via LDAP et Kerberos.
+                    Collecte BloodHound pour analyse relationnelle.
+                </p>
+                <div class="attacks-list">
+                    <h4>🔍 Énumération</h4>
+                    <div class="attack-item"><span class="attack-icon">👤</span> User enumeration (Kerbrute)</div>
+                    <div class="attack-item"><span class="attack-icon">💻</span> Computer enumeration (LDAP)</div>
+                    <div class="attack-item"><span class="attack-icon">👥</span> Group membership (PowerView)</div>
+                    <div class="attack-item"><span class="attack-icon">🕸️</span> BloodHound collection</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 3: Analyse des données -->
+        <div class="phase p3">
+            <div class="phase-header" onclick="toggle('p3')">
+                <div class="phase-number">3</div>
+                <div class="phase-title">
+                    <h2>Analyse des données collectées</h2>
+                    <p>Traitement, stockage Neo4j et construction du graphe AD</p>
+                </div>
+                <div class="phase-duration">~5 min</div>
+            </div>
+            <div class="phase-content">
+                <div class="tools-list">
+                    <span class="tool-tag">Neo4j</span>
+                    <span class="tool-tag">PostgreSQL</span>
+                    <span class="tool-tag">Graph analysis</span>
+                </div>
+                <p style="color: #8b949e; font-size: 13px; margin: 15px 0;">
+                    Stockage des objets AD dans Neo4j pour analyse relationnelle.
+                    Identification des comptes privilégiés, analyse de la surface d'attaque.
+                </p>
+                <div class="attacks-list">
+                    <h4>📊 Traitement</h4>
+                    <div class="attack-item"><span class="attack-icon">💾</span> Stockage Neo4j</div>
+                    <div class="attack-item"><span class="attack-icon">🔗</span> Création relations</div>
+                    <div class="attack-item"><span class="attack-icon">📈</span> Analyse surface d'attaque</div>
+                    <div class="attack-item"><span class="attack-icon">🔑</span> Extraction credentials</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 4: Détection des vulnérabilités -->
+        <div class="phase p4">
+            <div class="phase-header" onclick="toggle('p4')">
+                <div class="phase-number">4</div>
+                <div class="phase-title">
+                    <h2>Détection des vulnérabilités</h2>
+                    <p>Identification automatique des failles de sécurité AD</p>
+                </div>
+                <div class="phase-duration">~10 min</div>
+            </div>
+            <div class="phase-content">
+                <div class="tools-list">
+                    <span class="tool-tag">DetectionEngine</span>
+                    <span class="tool-tag">ScoringEngine</span>
+                    <span class="tool-tag">CVE checks</span>
+                </div>
+                <p style="color: #8b949e; font-size: 13px; margin: 15px 0;">
+                    12 vérifications automatisées avec scoring multi-facteurs.
+                </p>
+                <div class="attacks-list">
+                    <h4>⚠️ Vulnérabilités détectées</h4>
+                    <div class="attack-item"><span class="attack-icon">🎫</span> Kerberoasting</div>
+                    <div class="attack-item"><span class="attack-icon">🎫</span> AS-REP Roasting</div>
+                    <div class="attack-item"><span class="attack-icon">🔓</span> Password in description</div>
+                    <div class="attack-item"><span class="attack-icon">⚡</span> SMB signing off</div>
+                    <div class="attack-item"><span class="attack-icon">🔐</span> Dangerous ACLs</div>
+                    <div class="attack-item"><span class="attack-icon">📜</span> ADCS ESC1-5</div>
+                    <div class="attack-item"><span class="attack-icon">🔄</span> Unconstrained Delegation</div>
+                    <div class="attack-item"><span class="attack-icon">➡️</span> RBCD Abuse</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 5: Exploitation (COMBINED) -->
+        <div class="phase p5">
+            <div class="phase-header" onclick="toggle('p5')">
+                <div class="phase-number">5</div>
+                <div class="phase-title">
+                    <h2>Exploitation</h2>
+                    <p>Validation, exécution des attaques, collecte de preuves</p>
+                </div>
+                <div class="phase-duration">~15 min</div>
+            </div>
+            <div class="phase-content">
+                <div class="sub-phases">
+                    <div class="sub-phase">5.1 Validation contrôlée</div>
+                    <div class="sub-phase">5.2 Exécution attaques</div>
+                    <div class="sub-phase">5.3 Preuves</div>
+                    <div class="sub-phase">5.4 Impact</div>
+                </div>
+                <div class="tools-list" style="margin-top: 15px;">
+                    <span class="tool-tag active">GetUserSPNs</span>
+                    <span class="tool-tag active">GetNPUsers</span>
+                    <span class="tool-tag active">ntlmrelayx</span>
+                    <span class="tool-tag active">secretsdump</span>
+                    <span class="tool-tag active">GodPotato</span>
+                    <span class="tool-tag active">mitm6</span>
+                </div>
+                <div class="attacks-list">
+                    <h4>💥 Attaques exécutées (Lab Report)</h4>
+                    <div class="attack-item"><span class="attack-icon">🎫</span> <strong>Kerberoasting</strong> → SQLService TGS hash</div>
+                    <div class="attack-item"><span class="attack-icon">🎫</span> <strong>AS-REP Roasting</strong> → mrogers hash</div>
+                    <div class="attack-item"><span class="attack-icon">🔑</span> <strong>Password in desc</strong> → mrogers:Password4, SQLService:Mypassword123!</div>
+                    <div class="attack-item"><span class="attack-icon">🔄</span> <strong>NTLM Relay</strong> → SAM dump DATAMAN</div>
+                    <div class="attack-item"><span class="attack-icon">📡</span> <strong>LLMNR Poisoning</strong> → NTLMv2 capture</div>
+                    <div class="attack-item"><span class="attack-icon">👑</span> <strong>DCSync</strong> → NTDS.dit dump (SQLService=DA)</div>
+                    <div class="attack-item"><span class="attack-icon">🔝</span> <strong>Priv Esc</strong> → SeImpersonate → SYSTEM (GodPotato)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 6: Analyse IA -->
+        <div class="phase p6">
+            <div class="phase-header" onclick="toggle('p6')">
+                <div class="phase-number">6</div>
+                <div class="phase-title">
+                    <h2>Analyse IA</h2>
+                    <p>Analyse intelligente, priorisation et recommandations</p>
+                </div>
+                <div class="phase-duration">~5 min</div>
+            </div>
+            <div class="phase-content">
+                <div class="tools-list">
+                    <span class="tool-tag">Ollama llama3.1</span>
+                    <span class="tool-tag">LangChain</span>
+                    <span class="tool-tag">RAG</span>
+                </div>
+                <p style="color: #8b949e; font-size: 13px; margin: 15px 0;">
+                    Utilisation de Ollama (llama3.1:8b) avec LangChain pour analyse contextuelle.
+                </p>
+                <div class="attacks-list">
+                    <h4>🤖 Analyses IA</h4>
+                    <div class="attack-item"><span class="attack-icon">📖</span> Explication des vulnérabilités</div>
+                    <div class="attack-item"><span class="attack-icon">⚖️</span> Priorisation des risques</div>
+                    <div class="attack-item"><span class="attack-icon">📋</span> Ordre d'exploitation suggéré</div>
+                    <div class="attack-item"><span class="attack-icon">💡</span> Recommandations de remédiation</div>
+                    <div class="attack-item"><span class="attack-icon">🗺️</span> Mapping MITRE ATT&CK</div>
+                    <div class="attack-item"><span class="attack-icon">📝</span> Narrative d'attaque</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Phase 7: Rapport final -->
+        <div class="phase p7">
+            <div class="phase-header" onclick="toggle('p7')">
+                <div class="phase-number">7</div>
+                <div class="phase-title">
+                    <h2>Rapport final</h2>
+                    <p>Génération du rapport de pentest complet</p>
+                </div>
+                <div class="phase-duration">~3 min</div>
+            </div>
+            <div class="phase-content">
+                <div class="tools-list">
+                    <span class="tool-tag">Jinja2</span>
+                    <span class="tool-tag">WeasyPrint</span>
+                    <span class="tool-tag">PDF</span>
+                </div>
+                <p style="color: #8b949e; font-size: 13px; margin: 15px 0;">
+                    Génération du rapport final au format PDF/HTML.
+                </p>
+                <div class="attacks-list">
+                    <h4>📄 Sections du rapport</h4>
+                    <div class="attack-item"><span class="attack-icon">📋</span> Résumé exécutif</div>
+                    <div class="attack-item"><span class="attack-icon">🎯</span> Méthodologie</div>
+                    <div class="attack-item"><span class="attack-icon">⚠️</span> Findings techniques</div>
+                    <div class="attack-item"><span class="attack-icon">🗺️</span> Chemins d'attaque</div>
+                    <div class="attack-item"><span class="attack-icon">💥</span> Preuves d'exploitation</div>
+                    <div class="attack-item"><span class="attack-icon">🔧</span> Plan de remédiation</div>
+                    <div class="attack-item"><span class="attack-icon">📊</span> Score de risque global</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #1f6feb;"></div> Reconnaissance</div>
+            <div class="legend-item"><div class="legend-color" style="background: #a371f7;"></div> Énumération</div>
+            <div class="legend-item"><div class="legend-color" style="background: #3fb950;"></div> Analyse</div>
+            <div class="legend-item"><div class="legend-color" style="background: #f85149;"></div> Détection</div>
+            <div class="legend-item"><div class="legend-color" style="background: #d29922;"></div> Exploitation</div>
+            <div class="legend-item"><div class="legend-color" style="background: #8957e5;"></div> IA</div>
+            <div class="legend-item"><div class="legend-color" style="background: #58a6ff;"></div> Rapport</div>
+        </div>
+    </div>
+    
+    <script>
+        function toggle(id) {
+            document.querySelector('.phase.p' + id.slice(1)).classList.toggle('expanded');
+        }
+        
+        function toggleAll() {
+            const phases = document.querySelectorAll('.phase');
+            const allExpanded = Array.from(phases).every(p => p.classList.contains('expanded'));
+            phases.forEach(p => {
+                if (allExpanded) p.classList.remove('expanded');
+                else p.classList.add('expanded');
+            });
+        }
+    </script>
+</body>
+</html>
