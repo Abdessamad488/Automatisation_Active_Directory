@@ -333,7 +333,7 @@ class ReportGenerator:
             successful_exploits = sum(1 for e in exploits if e.get("success"))
             
             # Build comprehensive markdown report
-            md_content = f"""# Rapport de Pentest - {scan.target_domain if scan else 'pentestlab.local'}
+            md_content = f"""# Rapport de Pentest - {scan.target_domain if scan else 'DATAPROTECT.local'}
 
 **Date:** {datetime.now().strftime('%d/%m/%Y')}  
 **Version:** 1.0  
@@ -345,10 +345,10 @@ class ReportGenerator:
 
 ### Vue d'ensemble
 Ce rapport présente les résultats d'un test d'intrusion automatisé effectué sur l'infrastructure 
-Active Directory **{scan.target_domain if scan else 'pentestlab.local'}**.
+Active Directory **{scan.target_domain if scan else 'DATAPROTECT.local'}**.
 
 ### Périmètre
-- **Domaine:** {scan.target_domain if scan else 'pentestlab.local'}
+- **Domaine:** {scan.target_domain if scan else 'DATAPROTECT.local'}
 - **Contrôleur de domaine:** 192.168.142.128
 - **Date du test:** {scan.created_at.strftime('%d/%m/%Y') if scan and scan.created_at else datetime.now().strftime('%d/%m/%Y')}
 - **Type de test:** {scan.scan_type if scan else 'blackbox'}
